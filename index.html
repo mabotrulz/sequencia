@@ -8,48 +8,60 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;font-family:'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;min-height:100dvh;overflow:hidden;user-select:none}
 .game{width:100vw;max-width:600px;min-height:100dvh;background:linear-gradient(180deg,#1a1a2e,#16213e,#0f3460);display:flex;flex-direction:column;position:relative;overflow:hidden}
+
 .header{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;color:#888;font-size:clamp(12px,2.5vw,14px);flex-shrink:0}
 .header .score{color:#f1c40f;font-weight:700}
 .header .round{color:#4ecca3}
-.pattern-label{text-align:center;color:#f1c40f;font-size:clamp(14px,3vw,18px);font-weight:600;padding:2px;letter-spacing:4px;flex-shrink:0}
-.seq-area{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px;gap:6px}
+
+.sequence-area{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8px;gap:10px}
 .seq-row{display:flex;gap:clamp(4px,1.5vw,10px);flex-wrap:wrap;justify-content:center}
-.seq-card{width:clamp(55px,14vw,85px);height:clamp(75px,18vw,110px);background:#2d2d4e;border:3px solid #555;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 4px 2px;transition:all 0.3s}
+.seq-card{width:clamp(55px,14vw,85px);height:clamp(75px,18vw,110px);background:#2d2d4e;border:3px solid #555;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 4px 2px;transition:all 0.3s;position:relative}
 .seq-card .char-img{width:clamp(40px,10vw,65px);height:clamp(40px,10vw,65px);object-fit:contain}
 .seq-card .idx-label{font-size:clamp(9px,2vw,11px);color:#666;margin-top:2px}
 .seq-card.filled{border-color:#4ecca3;background:rgba(78,204,163,0.1)}
-.seq-card.next{border-color:#f1c40f;border-style:dashed;background:rgba(241,196,15,0.05);animation:pulse 1.5s ease infinite}
-.seq-card.next .next-mark{position:absolute;top:4px;font-size:clamp(10px,2vw,13px);color:#f1c40f;font-weight:700}
-.seq-card.correct{border-color:#4ecca3;animation:pop 0.4s}
+.seq-card.blank{border-color:#f1c40f;border-style:dashed;background:rgba(241,196,15,0.05);
+animation:pulse 1.5s ease infinite}
+.seq-card.blank .char-img{opacity:0.2}
 .seq-card.wrong{border-color:#e74c3c;animation:shake 0.35s}
+.seq-card.correct{border-color:#4ecca3;animation:pop 0.4s}
+.seq-card.hint{border-color:#3498db;background:rgba(52,152,219,0.15)}
 @keyframes pulse{0%,100%{border-color:#f1c40f}50%{border-color:#f39c12}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
-@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes birdHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pigJump{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-10px) scale(1.1)}70%{transform:translateY(-5px)}}
+@keyframes pigShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
 
 .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(4px,1.5vw,10px);padding:8px 12px 12px;flex-shrink:0}
 .choice-btn{background:#2d2d4e;border:3px solid #555;border-radius:12px;padding:6px 4px 2px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center}
 .choice-btn:hover{border-color:#4ecca3;transform:scale(1.05)}
 .choice-btn .char-img{width:clamp(35px,9vw,55px);height:clamp(35px,9vw,55px);object-fit:contain}
 .choice-btn .ch-name{font-size:clamp(8px,1.8vw,10px);color:#aaa;margin-top:2px}
-.choice-btn.correct{border-color:#4ecca3;background:rgba(78,204,163,0.2)}
-.choice-btn.wrong{border-color:#e74c3c;background:rgba(231,76,60,0.2);animation:shake 0.35s}
-.choice-btn:disabled{opacity:0.5;pointer-events:none}
+.choice-btn.selected{border-color:#f1c40f;background:rgba(241,196,15,0.1)}
 
 .feedback{text-align:center;min-height:clamp(20px,4vw,30px);font-size:clamp(14px,3vw,18px);font-weight:600;padding:2px 12px;flex-shrink:0}
 .feedback.ok{color:#4ecca3}.feedback.fail{color:#e74c3c}
 
+/* Explosion overlay */
+.explosion-overlay{position:absolute;inset:0;z-index:100;pointer-events:none;overflow:hidden}
+.flying-pig{position:absolute;width:clamp(30px,8vw,50px);height:clamp(30px,8vw,50px);object-fit:contain;animation:flyingPig 1.5s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes flyingPig{0%{transform:scale(0.5) translate(0,0);opacity:1}100%{transform:scale(1.5) translate(var(--fx),var(--fy));opacity:0}}
+
+/* Win overlay */
 .win-overlay{position:absolute;inset:0;z-index:200;background:rgba(15,52,96,0.93);display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity 0.5s;padding:30px;text-align:center}
 .win-overlay.active{opacity:1;pointer-events:all}
 .win-overlay h2{font-size:clamp(28px,7vw,42px);color:#4ecca3;margin-bottom:4px}
 .win-overlay .big{font-size:clamp(60px,16vw,100px);margin:10px 0}
 .win-overlay button{padding:12px 36px;font-size:clamp(14px,3vw,18px);font-weight:700;background:#4ecca3;color:#1a1a2e;border:none;border-radius:12px;cursor:pointer;margin-top:12px}
+
 .start-overlay{position:absolute;inset:0;z-index:300;background:rgba(15,52,96,0.95);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:30px;text-align:center;transition:opacity 0.5s}
 .start-overlay.hidden{opacity:0;pointer-events:none}
-.start-overlay .logo{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.start-overlay .logo{font-size:clamp(60px,16vw,100px);margin-bottom:8px;display:flex;gap:6px;align-items:center}
 .start-overlay .logo img{width:clamp(35px,9vw,55px);height:clamp(35px,9vw,55px)}
 .start-overlay h1{color:#4ecca3;font-size:clamp(22px,6vw,36px);margin-bottom:4px}
 .start-overlay p{color:#aaa;font-size:clamp(13px,3vw,16px);margin-bottom:20px}
 .start-overlay .start-btn{padding:16px 48px;font-size:clamp(18px,4vw,24px);font-weight:700;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;border-radius:16px;cursor:pointer;letter-spacing:2px}
+
 .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:250}
 .conf{position:absolute;border-radius:2px;animation:confFall linear forwards}
 @keyframes confFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
@@ -62,11 +74,10 @@ body{background:#1a1a2e;font-family:'Segoe UI',sans-serif;display:flex;justify-c
     <span class="round" id="roundDisplay">Ronda 1/8</span>
     <span class="score" id="scoreDisplay">0 ✅</span>
   </div>
-  <div class="pattern-label" id="patternLabel"></div>
   
-  <div class="seq-area" id="seqArea">
+  <div class="sequence-area" id="seqArea">
     <div class="seq-row" id="seqRow"></div>
-    <div style="color:#888;font-size:clamp(11px,2.5vw,13px);margin-top:2px">O que vem a seguir?</div>
+    <div style="color:#888;font-size:clamp(11px,2.5vw,13px);margin-top:2px">Qual é o padrão? Preenche os espaços em branco!</div>
   </div>
   
   <div class="choices" id="choices"></div>
@@ -81,15 +92,18 @@ body{background:#1a1a2e;font-family:'Segoe UI',sans-serif;display:flex;justify-c
   
   <div class="start-overlay" id="startOverlay">
     <div class="logo">
-      <img src="assets/red_bird.png" alt=""><span>+</span><img src="assets/green_pig.png" alt="">
+      <img src="assets/red_bird.png" alt="">
+      <span>+</span>
+      <img src="assets/green_pig.png" alt="">
     </div>
     <h1>Sequência</h1>
-    <p>Descobre o padrão! O que vem a seguir?</p>
+    <p>Descobre o padrão e completa a sequência!</p>
     <button class="start-btn" onclick="startGame()">▶ COMEÇAR</button>
   </div>
 </div>
 
 <script>
+// Characters: birds + pigs
 const ALL_CHARS = [
   {file:'red_bird.png',name:'Red',type:'bird'},
   {file:'blue_bird.png',name:'Blues',type:'bird'},
@@ -101,254 +115,443 @@ const ALL_CHARS = [
   {file:'corporal_pig.png',name:'Cabo',type:'pig'},
 ];
 
-const PATTERNS = [
-  {type:'AB', rep:'A B', hint:'Alternado'},
-  {type:'AAB', rep:'A A B', hint:'Dois de um, um do outro'},
-  {type:'ABB', rep:'A B B', hint:'Um, depois dois do outro'},
-  {type:'ABC', rep:'A B C', hint:'Três diferentes'},
-  {type:'AABB', rep:'A A B B', hint:'Pares'},
-  {type:'ABBA', rep:'A B B A', hint:'Espelho'},
-  {type:'ABA', rep:'A B A', hint:'A volta sempre'},
-];
-
-let score=0,round=0,audioInit=false;
-let sequence=[],fullSeq=[],seqPos=0,nextAnswer=null;
-let totalRounds=10;
+let score=0,round=0,audioInit=false,audioCtx=null;
+let sequence=[],blanks=[],selectedChoice=null,currentAnswers=[];
+let animTimers=[],isWin=false;
+const TOTAL_ROUNDS=8;
+const SEQ_LENGTHS=[6,6,6,7,7,7,8,8];
+const BLANK_COUNTS=[2,2,3,2,3,3,3,4];
 
 function initAudio(){
   if(audioInit)return;audioInit=true;
-  try{new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
+  try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}catch(e){}
 }
 
-function speak(t){
-  if(!window.speechSynthesis)return;
+function speak(t,cb){
+  if(!window.speechSynthesis){if(cb)cb();return}
   window.speechSynthesis.cancel();
   var u=new SpeechSynthesisUtterance(t);
   u.lang='pt-PT';u.rate=0.85;u.pitch=0.9;
+  if(cb)u.onend=cb;
   window.speechSynthesis.speak(u);
 }
 
-function sfxCorrect(){
+function playAudio(src,vol){
   try{
-    var ac=new(window.AudioContext||window.webkitAudioContext)();
-    var o=ac.createOscillator(),g=ac.createGain();
-    o.type='triangle';o.frequency.setValueAtTime(523,ac.currentTime);
-    o.frequency.linearRampToValueAtTime(784,ac.currentTime+0.15);
-    g.gain.setValueAtTime(0.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.2);
-    o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.2);
+    var a=new Audio(src);
+    if(vol!=null)a.volume=vol;
+    a.play();
   }catch(e){}
 }
-function sfxWrong(){
-  try{
-    var ac=new(window.AudioContext||window.webkitAudioContext)();
-    var o=ac.createOscillator(),g=ac.createGain();
-    o.type='square';o.frequency.value=180;g.gain.setValueAtTime(0.1,ac.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.2);
-    o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.2);
-  }catch(e){}
-}
-function sfxWin(){
-  try{
-    var ac=new(window.AudioContext||window.webkitAudioContext)();
-    var o=ac.createOscillator(),g=ac.createGain();
-    o.type='triangle';o.frequency.setValueAtTime(523,ac.currentTime);
-    o.frequency.linearRampToValueAtTime(659,ac.currentTime+0.12);
-    o.frequency.linearRampToValueAtTime(784,ac.currentTime+0.25);
-    o.frequency.linearRampToValueAtTime(1047,ac.currentTime+0.4);
-    g.gain.setValueAtTime(0.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.5);
-    o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.5);
-  }catch(e){}
-}
+
+function sfxCorrect(){try{if(!audioCtx)return;var o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.setValueAtTime(523,audioCtx.currentTime);o.frequency.linearRampToValueAtTime(784,audioCtx.currentTime+0.15);g.gain.setValueAtTime(0.2,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+0.2)}catch(e){}}
+function sfxWrong(){try{if(!audioCtx)return;var o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='square';o.frequency.value=180;g.gain.setValueAtTime(0.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+0.2)}catch(e){}}
+function sfxWin(){try{if(!audioCtx)return;var o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.setValueAtTime(523,audioCtx.currentTime);o.frequency.linearRampToValueAtTime(659,audioCtx.currentTime+0.12);o.frequency.linearRampToValueAtTime(784,audioCtx.currentTime+0.25);o.frequency.linearRampToValueAtTime(1047,audioCtx.currentTime+0.4);g.gain.setValueAtTime(0.2,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+0.5)}catch(e){}}
 
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 function confetti(){
-  var c=document.createElement('div');c.className='confetti';
-  document.querySelector('.game').appendChild(c);
-  var colors=['#f1c40f','#e74c3c','#4ecca3','#3498db','#9b59b6'];
-  for(var i=0;i<40;i++){
-    var e=document.createElement('div');e.className='conf';
-    e.style.left=Math.random()*100+'%';e.style.background=colors[Math.floor(Math.random()*colors.length)];
-    e.style.width=(3+Math.random()*6)+'px';e.style.height=(3+Math.random()*6)+'px';
-    e.style.animationDuration=(1.5+Math.random()*2)+'s';e.style.animationDelay=(Math.random()*1.5)+'s';
-    c.appendChild(e);
+  var container=document.createElement('div');container.className='confetti';
+  document.querySelector('.game').appendChild(container);
+  var colors=['#f1c40f','#e74c3c','#4ecca3','#3498db','#9b59b6','#e67e22'];
+  for(var i=0;i<50;i++){
+    var c=document.createElement('div');c.className='conf';
+    c.style.left=Math.random()*100+'%';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.width=(3+Math.random()*7)+'px';c.style.height=(3+Math.random()*7)+'px';
+    c.style.animationDuration=(1.5+Math.random()*2)+'s';
+    c.style.animationDelay=(Math.random()*1.5)+'s';
+    container.appendChild(c);
   }
-  setTimeout(function(){c.remove()},5000);
+  setTimeout(function(){container.remove()},5000);
 }
 
 function startGame(){
   initAudio();
   document.getElementById('startOverlay').classList.add('hidden');
-  score=0;round=0;
+  score=0;round=0;isWin=false;
   document.getElementById('scoreDisplay').textContent='0 ✅';
   nextRound();
 }
 
-function nextRound(){
-  if(round>=totalRounds){gameWin();return}
+function startIdleAnimations(){
+  // Clear old timers
+  animTimers.forEach(function(t){clearTimeout(t)});
+  animTimers=[];
   
-  var pType=PATTERNS[round%PATTERNS.length];
-  var pool=shuffle([...ALL_CHARS]);
-  var patternChars=pool.slice(0,pType.type.length);
-  
-  // Build the full sequence (show 3 full cycles)
-  fullSeq=[];
-  for(var i=0;i<3;i++){
-    for(var j=0;j<pType.type.length;j++){
-      var idx=pType.type.charCodeAt(j)-65;
-      fullSeq.push(patternChars[idx]);
-    }
-  }
-  
-  // Show positions 0 through (showCount-1), then the rest are "what comes next?"
-  var showCount=Math.max(3, pType.type.length+1);
-  sequence=fullSeq.slice(0,showCount);
-  seqPos=showCount;
-  
-  document.getElementById('patternLabel').textContent=pType.type+' = '+pType.rep+' ('+pType.hint+')';
-  document.getElementById('roundDisplay').textContent='Ronda '+(round+1)+'/'+totalRounds;
-  
-  renderBoard();
-  speak('Qual é o próximo?');
+  var cards=document.querySelectorAll('.seq-card');
+  cards.forEach(function(card,idx){
+    if(sequence[idx]===null)return; // blank
+    scheduleAnim(card,idx);
+  });
 }
 
-function renderBoard(){
+function scheduleAnim(card,idx){
+  if(isWin)return;
+  var delay=3000+Math.random()*4000;
+  var t=setTimeout(function(){
+    if(isWin||!card)return;
+    var char=sequence[idx];
+    if(!char)return;
+    var img=card.querySelector('.char-img');
+    if(!img)return;
+    
+    if(char.type==='bird'){
+      // Bird hop + chirp
+      img.style.animation='none';
+      void img.offsetWidth;
+      img.style.animation='birdHop 0.3s ease';
+      setTimeout(function(){img.style.animation=''},300);
+      playAudio('assets/bird_chirp.wav',0.3);
+    }else{
+      // Pig jump + random sound
+      var r=Math.random();
+      img.style.animation='none';
+      void img.offsetWidth;
+      if(r<0.33){
+        img.style.animation='pigJump 0.4s ease';
+        playAudio('assets/pig_fart.wav',0.3);
+      }else if(r<0.66){
+        img.style.animation='pigShake 0.4s ease';
+        playAudio('assets/pig_laugh.wav',0.3);
+      }else{
+        img.style.animation='pigJump 0.3s ease';
+        playAudio('assets/pig_snort.wav',0.3);
+      }
+      setTimeout(function(){img.style.animation=''},400);
+    }
+    
+    scheduleAnim(card,idx);
+  },delay);
+  animTimers.push(t);
+}
+
+function nextRound(){
+  if(round>=TOTAL_ROUNDS){
+    gameWin();
+    return;
+  }
+  
+  // Pick characters for this round's pattern
+  var seqLen=SEQ_LENGTHS[round];
+  var blankCount=BLANK_COUNTS[round];
+  
+  // Pick a pattern type: AB, AAB, ABB, ABC, AABB, ABBC, ABCD
+  var patternTypes=['AB','AAB','ABB','ABC','AABB','ABBC','ABCD'];
+  var pType=patternTypes[Math.floor(Math.random()*patternTypes.length)];
+  var patternLen=pType.length;
+  
+  // Pick characters for the pattern
+  var pool=shuffle([...ALL_CHARS]);
+  var pattern=pool.slice(0,patternLen);
+  
+  // Build sequence using the pattern type
+  sequence=[];
+  for(var i=0;i<seqLen;i++){
+    var patIdx=pType[i%pType.length];
+    // patIdx is 'A','B','C','D' -> map to 0,1,2,3
+    var idx=patIdx.charCodeAt(0)-65;
+    sequence.push(pattern[idx]);
+  }
+  
+  // Pick blank positions — each must have been shown at least once before
+  var allPos=[];
+  for(var i=0;i<seqLen;i++){
+    // Check if this character has appeared somewhere before position i
+    var seen=false;
+    for(var j=0;j<i;j++){
+      if(sequence[j].file===sequence[i].file){seen=true;break;}
+    }
+    if(seen)allPos.push(i);
+  }
+  blanks=shuffle(allPos).slice(0,Math.min(blankCount,allPos.length));
+  blanks.sort(function(a,b){return a-b});
+  
+  // Capture correct answers BEFORE nulling
+  currentAnswers=[];
+  blanks.forEach(function(pos){
+    currentAnswers.push(sequence[pos]);
+  });
+  
+  // Null out blank positions in the sequence
+  blanks.forEach(function(pos){sequence[pos]=null;});
+  
+  selectedChoice=null;
+  renderRound();
+  var hint='Completa a sequência! Escolhe o personagem que falta em cada espaço.';
+  speak(hint,'pt-PT');
+  startIdleAnimations();
+}
+
+function renderRound(){
+  document.getElementById('roundDisplay').textContent='Ronda '+(round+1)+'/'+TOTAL_ROUNDS;
   document.getElementById('feedback').textContent='';
   
   var row=document.getElementById('seqRow');
   row.innerHTML='';
   
-  // Show revealed cards
   sequence.forEach(function(char,idx){
     var card=document.createElement('div');
-    card.className='seq-card filled';
+    card.className='seq-card';
+    card.dataset.idx=idx;
+    
+    var isBlank=blanks.indexOf(idx)>=0;
+    if(isBlank){
+      card.classList.add('blank');
+      var placeholder=document.createElement('span');
+      placeholder.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(24px,6vw,40px);color:#f1c40f';
+      placeholder.textContent='?';
+      card.appendChild(placeholder);
+    }else{
+      var img=document.createElement('img');
+      img.className='char-img';
+      img.src='assets/'+char.file;
+      card.appendChild(img);
+    }
+    
+    var label=document.createElement('div');
+    label.className='idx-label';
+    label.textContent=(idx+1);
+    card.appendChild(label);
+    
+    row.appendChild(card);
+  });
+  
+  // Render choices - show characters NOT in the blanks (so they have to deduce)
+  var usedFiles={};
+  // Track which files are used in the sequence (skip blanks)
+  sequence.forEach(function(c){if(c)usedFiles[c.file]=true});
+  
+  // Pick 4 choices including correct ones and some distractor
+  var correctFiles={};
+  currentAnswers.forEach(function(c){correctFiles[c.file]=true});
+  
+  var choicePool=[];
+  // Add correct answers
+  currentAnswers.forEach(function(c){
+    if(!choicePool.find(function(x){return x.file===c.file})){
+      choicePool.push(c);
+    }
+  });
+  // Add distractors
+  var distractorPool=ALL_CHARS.filter(function(c){return !correctFiles[c.file]});
+  shuffle(distractorPool);
+  while(choicePool.length<4 && distractorPool.length>0){
+    choicePool.push(distractorPool.pop());
+  }
+  shuffle(choicePool);
+  
+  var choicesDiv=document.getElementById('choices');
+  choicesDiv.innerHTML='';
+  choicePool.forEach(function(char){
+    var btn=document.createElement('div');
+    btn.className='choice-btn';
+    btn.dataset.file=char.file;
+    btn.dataset.type=char.type;
+    
+    var img=document.createElement('img');
+    img.className='char-img';
+    img.src='assets/'+char.file;
+    btn.appendChild(img);
+    
+    var name=document.createElement('div');
+    name.className='ch-name';
+    name.textContent=char.name;
+    btn.appendChild(name);
+    
+    btn.addEventListener('click',function(){
+      selectChoice(this,char);
+    });
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function selectChoice(el,char){
+  // Deselect all
+  document.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('selected')});
+  el.classList.add('selected');
+  selectedChoice=char;
+  
+  // Fill next blank
+  fillNextBlank(char);
+}
+
+function fillNextBlank(char){
+  // Find first unfilled blank
+  var filled=0;
+  blanks.forEach(function(pos){
+    if(sequence[pos]===null)filled++;
+  });
+  
+  var allBlanksFilled=!blanks.some(function(p){return sequence[p]===null});
+  if(allBlanksFilled)return;
+  
+  // Get next blank position
+  var nextBlank=null;
+  for(var i=0;i<blanks.length;i++){
+    if(sequence[blanks[i]]===null){
+      nextBlank=blanks[i];
+      break;
+    }
+  }
+  if(nextBlank===null)return;
+  
+  // Fill it
+  sequence[nextBlank]=char;
+  
+  // Re-render to show the filled card
+  var card=document.querySelector('.seq-card[data-idx="'+nextBlank+'"]');
+  if(card){
+    card.innerHTML='';
     var img=document.createElement('img');
     img.className='char-img';
     img.src='assets/'+char.file;
     card.appendChild(img);
     var label=document.createElement('div');
     label.className='idx-label';
-    label.textContent=(idx+1);
+    label.textContent=(nextBlank+1);
     card.appendChild(label);
-    row.appendChild(card);
-  });
-  
-  // Show "next" card
-  var nextCard=document.createElement('div');
-  nextCard.className='seq-card next';
-  nextCard.id='nextCard';
-  var q=document.createElement('div');
-  q.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(28px,7vw,50px);color:#f1c40f;font-weight:700';
-  q.textContent='?';
-  nextCard.appendChild(q);
-  var label=document.createElement('div');
-  label.className='idx-label';
-  label.textContent=(sequence.length+1);
-  nextCard.appendChild(label);
-  row.appendChild(nextCard);
-  
-  // Generate choices: 1 correct + 3 distractors
-  nextAnswer=fullSeq[showCount];
-  var found=nextAnswer;
-  
-  var choices=[found];
-  var distractorPool=ALL_CHARS.filter(function(c){return c.file!==found.file});
-  shuffle(distractorPool);
-  while(choices.length<4 && distractorPool.length>0){
-    choices.push(distractorPool.pop());
+    card.classList.remove('blank');
+    card.classList.add('filled');
+    
+    // Check if all blanks filled
+    var allFilled=!blanks.some(function(p){return sequence[p]===null});
+    if(allFilled){
+      setTimeout(checkAnswer,300);
+    }
   }
-  shuffle(choices);
-  
-  var choicesDiv=document.getElementById('choices');
-  choicesDiv.innerHTML='';
-  choices.forEach(function(char){
-    var btn=document.createElement('div');
-    btn.className='choice-btn';
-    var img=document.createElement('img');
-    img.className='char-img';
-    img.src='assets/'+char.file;
-    btn.appendChild(img);
-    var name=document.createElement('div');
-    name.className='ch-name';
-    name.textContent=char.name;
-    btn.appendChild(name);
-    btn.addEventListener('click',function(){checkAnswer(this,char);});
-    choicesDiv.appendChild(btn);
-  });
 }
 
-function checkAnswer(el,char){
-  if(el.disabled)return;
-  
-  // Disable all
-  document.querySelectorAll('.choice-btn').forEach(function(b){b.disabled=true});
-  
-  if(char.file===nextAnswer.file){
-    sfxCorrect();
-    score++;
-    document.getElementById('scoreDisplay').textContent=score+' ✅';
-    el.classList.add('correct');
-    
-    // Add character to the sequence
-    sequence.push(char);
-    seqPos++;
-    
-    // Animate the next card filling
-    var nc=document.getElementById('nextCard');
-    if(nc){
-      nc.classList.remove('next');
-      nc.classList.add('filled','correct');
-      nc.innerHTML='';
-      var img=document.createElement('img');
-      img.className='char-img';
-      img.src='assets/'+char.file;
-      nc.appendChild(img);
-      var label=document.createElement('div');
-      label.className='idx-label';
-      label.textContent=sequence.length;
-      nc.appendChild(label);
+function checkAnswer(){
+  var correct=true;
+  blanks.forEach(function(pos,idx){
+    if(sequence[pos].file!==currentAnswers[idx].file){
+      correct=false;
     }
-    
+  });
+  
+  if(correct){
+    sfxCorrect();
+    score+=blanks.length;
+    document.getElementById('scoreDisplay').textContent=score+' ✅';
     document.getElementById('feedback').textContent='✅ Correto!';
     document.getElementById('feedback').className='feedback ok';
     
-    // Check if round is complete
-    if(seqPos>=fullSeq.length){
-      // Round complete!
-      setTimeout(function(){
-        round++;
-        nextRound();
-      },1500);
-    }else{
-      // More to guess
-      setTimeout(function(){
-        // Add new "next" card
-        renderBoard();
-      },1200);
-    }
+    // Mark cards as correct
+    blanks.forEach(function(pos){
+      var card=document.querySelector('.seq-card[data-idx="'+pos+'"]');
+      if(card)card.classList.add('correct');
+    });
+    
+    // Explode pigs!
+    explodePigs();
+    
+    speak('Muito bem!','pt-PT');
+    
+    // Wait for explosion, then next round
+    setTimeout(function(){
+      round++;
+      nextRound();
+    },2500);
   }else{
     sfxWrong();
-    el.classList.add('wrong');
     document.getElementById('feedback').textContent='❌ Tenta outra vez!';
     document.getElementById('feedback').className='feedback fail';
     
-    // Re-enable after brief delay
+    // Shake wrong answers and reset
+    blanks.forEach(function(pos){
+      var card=document.querySelector('.seq-card[data-idx="'+pos+'"]');
+      if(card)card.classList.add('wrong');
+    });
+    
+    // Reset blanks after a moment
     setTimeout(function(){
-      el.classList.remove('wrong');
-      document.querySelectorAll('.choice-btn').forEach(function(b){b.disabled=false});
-    },800);
+      blanks.forEach(function(pos){
+        sequence[pos]=null;
+        var card=document.querySelector('.seq-card[data-idx="'+pos+'"]');
+        if(card){
+          card.classList.remove('wrong','filled','correct');
+          card.classList.add('blank');
+          card.innerHTML='';
+          var placeholder=document.createElement('span');
+          placeholder.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(24px,6vw,40px);color:#f1c40f';
+          placeholder.textContent='?';
+          card.appendChild(placeholder);
+          var label=document.createElement('div');
+          label.className='idx-label';
+          label.textContent=(pos+1);
+          card.appendChild(label);
+        }
+      });
+      document.getElementById('feedback').textContent='';
+      selectedChoice=null;
+      document.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('selected')});
+    },1000);
   }
 }
 
+function explodePigs(){
+  // Find all pig images in the sequence and fly them out
+  var ov=document.createElement('div');
+  ov.className='explosion-overlay';
+  document.querySelector('.game').appendChild(ov);
+  
+  var pigCount=0;
+  blanks.forEach(function(pos){
+    var char=sequence[pos];
+    if(!char||char.type!=='pig')return;
+    pigCount++;
+    
+    for(var i=0;i<3;i++){
+      var img=document.createElement('img');
+      img.className='flying-pig';
+      img.src='assets/'+char.file;
+      img.style.left=(20+Math.random()*60)+'%';
+      img.style.top=(30+Math.random()*40)+'%';
+      img.style.setProperty('--fx',(-200+Math.random()*400)+'px');
+      img.style.setProperty('--fy',(-300+Math.random()*200)+'px');
+      img.style.animationDuration=(1+Math.random()*0.5)+'s';
+      ov.appendChild(img);
+    }
+  });
+  
+  sfxExplosion();
+  setTimeout(function(){ov.remove()},2500);
+}
+
+function sfxExplosion(){
+  try{
+    if(!audioCtx)return;
+    var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sawtooth';o.frequency.setValueAtTime(300,audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(30,audioCtx.currentTime+0.5);
+    g.gain.setValueAtTime(0.3,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.6);
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start();o.stop(audioCtx.currentTime+0.6);
+    // Noise burst
+    var o2=audioCtx.createOscillator(),g2=audioCtx.createGain();
+    o2.type='square';o2.frequency.setValueAtTime(100+Math.random()*200,audioCtx.currentTime);
+    o2.frequency.exponentialRampToValueAtTime(20,audioCtx.currentTime+0.3);
+    g2.gain.setValueAtTime(0.2,audioCtx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);
+    o2.connect(g2);g2.connect(audioCtx.destination);
+    o2.start();o2.stop(audioCtx.currentTime+0.4);
+  }catch(e){}
+}
+
 function gameWin(){
+  isWin=true;
+  animTimers.forEach(function(t){clearTimeout(t)});
   document.getElementById('winOverlay').classList.add('active');
   sfxWin();
-  speak('Parabéns!');
+  speak('Parabéns! Completaste todas as sequências!','pt-PT');
   confetti();
 }
 
 function restartGame(){
   document.getElementById('winOverlay').classList.remove('active');
+  animTimers.forEach(function(t){clearTimeout(t)});
   startGame();
 }
 </script>
