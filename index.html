@@ -554,20 +554,20 @@ function explodePigs(){
       var ty=10+Math.random()*50;
       img.style.left=tx+'%';
       img.style.top=ty+'%';
-      img.style.transform='scale(0.2)  rotate('+(Math.random()-0.5)+'turn)';
-      // Force reflow so browser sees initial state
-      void img.offsetHeight;
-      // After delay: grow big
-      setTimeout(function(){
-        img.style.transition='transform 0.5s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s';
-        img.style.transform='scale('+(3+Math.random()*2)+') rotate('+(Math.random()-0.5)*0.1+'turn)';
-        img.style.opacity='1';
-      },delay*1000);
+      img.style.transform='scale(0.2)';
+      // Double rAF ensures browser paints initial state before transition
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          img.style.transition='transform 0.5s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s';
+          img.style.transform='scale('+(3+Math.random()*2)+')';
+          img.style.opacity='1';
+        });
+      });
       // Then slide down
       setTimeout(function(){
         img.style.transition='all 1.2s cubic-bezier(0.3,0.1,0.8,0.4)';
         img.style.top='110%';
-        img.style.transform='scale('+(2+Math.random())+') rotate('+(Math.random()-0.5)+'turn)';
+        img.style.transform='scale('+(2+Math.random())+')';
       },delay*1000+700);
     }else{
       // Spin and fly out in random direction
@@ -578,12 +578,13 @@ function explodePigs(){
       img.style.left='50%';
       img.style.top='50%';
       img.style.transform='translate(-50%,-50%) scale(0.3)';
-      void img.offsetHeight;
-      setTimeout(function(){
-        img.style.transition='all 1.2s cubic-bezier(.2,.8,.3,1)';
-        img.style.transform='translate(calc(-50%+'+dx+'px),calc(-50%+'+dy+'px)) scale(1.8) rotate('+(2+Math.random()*4)+'turn)';
-        img.style.opacity='0.8';
-      },delay*1000);
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          img.style.transition='all 1.2s cubic-bezier(.2,.8,.3,1)';
+          img.style.transform='translate(calc(-50%+'+dx+'px),calc(-50%+'+dy+'px)) scale(1.8) rotate('+(2+Math.random()*4)+'turn)';
+          img.style.opacity='0.8';
+        });
+      });
     }
     
     setTimeout(function(){img.remove()},3500);
