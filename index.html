@@ -247,9 +247,10 @@ function nextRound(){
     sequence.push(pattern[i%patternLen]);
   }
   
-  // Pick random positions to blank out
+  // Pick random positions to blank out — only from the SECOND half so pattern is visible first
   var allPos=[];
-  for(var i=0;i<seqLen;i++)allPos.push(i);
+  var midPoint=Math.floor(seqLen/2);
+  for(var i=midPoint;i<seqLen;i++)allPos.push(i);
   blanks=shuffle(allPos).slice(0,blankCount);
   blanks.sort(function(a,b){return a-b});
   
