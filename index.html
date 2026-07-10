@@ -188,7 +188,7 @@ function startIdleAnimations(){
 
 function scheduleAnim(card,idx){
   if(isWin)return;
-  var delay=1000+Math.random()*3000;
+  var delay=3000+Math.random()*4000;
   var t=setTimeout(function(){
     if(isWin||!card)return;
     var char=sequence[idx];
