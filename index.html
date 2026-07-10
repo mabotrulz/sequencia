@@ -235,16 +235,23 @@ function nextRound(){
   // Pick characters for this round's pattern
   var seqLen=SEQ_LENGTHS[round];
   var blankCount=BLANK_COUNTS[round];
-  var patternLen=2+Math.floor(Math.random()*2); // 2-3 unique chars per pattern
   
-  // Pick the pattern characters
+  // Pick a pattern type: AB, AAB, ABB, ABC, AABB, ABBC, ABCD
+  var patternTypes=['AB','AAB','ABB','ABC','AABB','ABBC','ABCD'];
+  var pType=patternTypes[Math.floor(Math.random()*patternTypes.length)];
+  var patternLen=pType.length;
+  
+  // Pick characters for the pattern
   var pool=shuffle([...ALL_CHARS]);
   var pattern=pool.slice(0,patternLen);
   
-  // Build sequence by repeating pattern
+  // Build sequence using the pattern type
   sequence=[];
   for(var i=0;i<seqLen;i++){
-    sequence.push(pattern[i%patternLen]);
+    var patIdx=pType[i%pType.length];
+    // patIdx is 'A','B','C','D' -> map to 0,1,2,3
+    var idx=patIdx.charCodeAt(0)-65;
+    sequence.push(pattern[idx]);
   }
   
   // Pick blank positions — each must have been shown at least once before
