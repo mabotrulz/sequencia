@@ -65,7 +65,10 @@ animation:pulse 1.5s ease infinite}
 .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:250}
 .conf{position:absolute;border-radius:2px;animation:confFall linear forwards}
 @keyframes confFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-@keyframes explRing{0%{transform:translate(-50%,-50%) scale(0);opacity:0;border-width:clamp(4px,1vw,8px)}40%{transform:translate(-50%,-50%) scale(1);opacity:1;border-width:clamp(2px,0.5vw,4px)}100%{transform:translate(-50%,-50%) scale(2.5);opacity:0;border-width:1px}}
+@keyframes explRing{0%{transform:translate(-50%,-50%) scale(0);opacity:0;border-width:clamp(4px,1vw,8px)}40%{transform:translate(-50%,-50%) scale(1);opacity:1;border-width:clamp(2px,0.5vw,4px)}100%{transform:translate(-50%,-50%) scale(3);opacity:0;border-width:1px}}
+@keyframes pigGrow{0%{transform:translate(-50%,-50%) scale(0.3) rotate(-10deg);opacity:0}20%{opacity:1}60%{transform:translate(-50%,-50%) scale(5) rotate(-3deg);opacity:1}80%{transform:translate(-50%,-50%) scale(5.5) rotate(3deg);opacity:1}100%{transform:translate(-50%,calc(50vh + 60vw)) scale(5) rotate(15deg);opacity:1}}
+@keyframes explBoom{0%{transform:translate(-50%,-50%) scale(0);opacity:0}20%{transform:translate(-50%,-50%) scale(0.5);opacity:1}50%{transform:translate(-50%,-50%) scale(2);opacity:1}100%{transform:translate(-50%,-50%) scale(3);opacity:0}}
+@keyframes flashAnim{0%{opacity:0.8}100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -488,92 +491,70 @@ function checkAnswer(){
 }
 
 function explodePigs(){
-  // Find all pigs in the sequence and fly them out from their card positions
-  var ov=document.createElement('div');
-  ov.className='explosion-overlay';
-  document.querySelector('.game').appendChild(ov);
+  // Flash
+  var flash=document.createElement('div');
+  flash.style.cssText='position:fixed;inset:0;background:rgba(255,255,255,0.8);z-index:190;pointer-events:none;animation:flashAnim 0.4s ease forwards';
+  document.body.appendChild(flash);
+  setTimeout(function(){flash.remove()},500);
   
-  // Explosion ring at center
-  var ring=document.createElement('div');
-  ring.style.cssText='position:absolute;left:50%;top:50%;width:clamp(30px,8vw,60px);height:clamp(30px,8vw,60px);border-radius:50%;border:clamp(4px,1vw,8px) solid #f39c12;transform:translate(-50%,-50%) scale(0);z-index:5;animation:explRing 0.6s ease forwards;pointer-events:none';
-  ring.style.animation='explRing 0.6s ease forwards';
-  ov.appendChild(ring);
+  // Explosion rings
+  for(var ri=0;ri<3;ri++){
+    var ring=document.createElement('div');
+    ring.style.cssText='position:fixed;left:50%;top:50%;width:20px;height:20px;border-radius:50%;border:6px solid '+['#f39c12','#e74c3c','#f1c40f'][ri]+';z-index:189;pointer-events:none;animation:explRing 0.7s ease forwards';
+    ring.style.animationDelay=(ri*0.1)+'s';
+    document.body.appendChild(ring);
+    setTimeout(function(r){r.remove()}.bind(null,ring),1500);
+  }
   
-  // Find pig cards in the sequence
+  // Find all pig cards in the sequence
   var pigCards=[];
   document.querySelectorAll('.seq-card').forEach(function(card,idx){
     if(idx>=sequence.length)return;
-    var char=currentAnswers ? null : null;
-    // Check directly: does this card show a pig?
     var img=card.querySelector('.char-img');
     if(!img||!img.src)return;
-    var src=img.src;
-    if(src.indexOf('pig')>=0){
-      pigCards.push({card:card,src:src,rect:card.getBoundingClientRect()});
+    if(img.src.indexOf('pig')>=0){
+      pigCards.push({card:card,src:img.src});
     }
   });
   
-  // Also check the blank cards that were filled — they might have pigs
+  // Also check blank positions that were filled with pigs
   blanks.forEach(function(pos){
     if(pos>=sequence.length)return;
     var char=sequence[pos];
     if(!char||char.type!=='pig')return;
-    // Check if this card already captured
     var card=document.querySelector('.seq-card[data-idx="'+pos+'"]');
     if(!card)return;
     var already=pigCards.some(function(p){return p.card===card});
     if(already)return;
     var img=card.querySelector('.char-img');
     if(!img)return;
-    pigCards.push({card:card,src:img.src,rect:card.getBoundingClientRect()});
+    pigCards.push({card:card,src:img.src});
   });
   
-  var gameRect=document.querySelector('.game').getBoundingClientRect();
+  // Explosion boom
+  var boom=document.createElement('div');
+  boom.style.cssText='position:fixed;left:50%;top:50%;width:40px;height:40px;background:radial-gradient(circle,#f39c12,#e74c3c);border-radius:50%;z-index:190;pointer-events:none;animation:explBoom 0.6s ease forwards';
+  document.body.appendChild(boom);
+  setTimeout(function(){boom.remove()},800);
+  
   var sfxPlayed=false;
   
+  // Each pig grows at center then slides down or flies off
   pigCards.forEach(function(pc,i){
-    var charImg=document.createElement('img');
-    charImg.src=pc.src;
-    charImg.style.cssText='position:absolute;width:clamp(40px,10vw,70px);height:clamp(40px,10vw,70px);object-fit:contain;z-index:10;pointer-events:none';
-    
-    // Position at the card's location
-    charImg.style.left=(pc.rect.left-gameRect.left)+'px';
-    charImg.style.top=(pc.rect.top-gameRect.top)+'px';
-    
-    var isSlideDown=i%2===0; // Half slide down, half fly away
-    if(isSlideDown){
-      // Grow and slide down (like neogame animation)
-      charImg.style.transition='all 1.8s cubic-bezier(0.2,0.8,0.3,1)';
-      charImg.style.zIndex='15';
-      ov.appendChild(charImg);
-      requestAnimationFrame(function(){
-        charImg.style.left='50%';
-        charImg.style.top='40%';
-        charImg.style.transform='translate(-50%,-50%) scale('+(3+Math.random())+')';
-        charImg.style.opacity='1';
-      });
-      setTimeout(function(){
-        charImg.style.transition='all 1.2s cubic-bezier(0.3,0.1,0.8,0.4)';
-        charImg.style.top=(gameRect.height+50)+'px';
-        charImg.style.transform='translate(-50%,0) scale('+(2.5+Math.random())+') rotate('+(-10+Math.random()*20)+'deg)';
-      },800);
-    }else{
-      // Fly away in random direction
-      var angle=Math.random()*Math.PI*2;
-      var distance=200+Math.random()*300;
-      var dx=Math.cos(angle)*distance;
-      var dy=Math.sin(angle)*distance-100;
-      charImg.style.transition='all 1.2s cubic-bezier(.2,.8,.3,1)';
-      ov.appendChild(charImg);
-      setTimeout(function(){
-        // Spin and fly
-        charImg.style.transform='translate('+dx+'px,'+dy+'px) scale(1.5) rotate('+(180+Math.random()*360)+'deg)';
-        charImg.style.opacity='0.6';
-      },50+Math.random()*100);
-    }
+    var delay=i*0.15;
+    var img=document.createElement('img');
+    img.src=pc.src;
+    img.style.cssText='position:fixed;left:50%;top:50%;z-index:200;pointer-events:none;width:80px;height:80px;object-fit:contain';
+    img.style.animation='pigGrow 2s cubic-bezier(0.2,0.8,0.3,1) forwards';
+    img.style.animationDelay=delay+'s';
+    img.style.opacity='0';
+    document.body.appendChild(img);
+    setTimeout(function(){img.remove()},3000);
     
     if(!sfxPlayed){
-      try { new Audio('assets/pig_hurt' + (Math.floor(Math.random()*2)+1) + '.wav').play(); } catch(e) {}
+      setTimeout(function(){
+        try{new Audio('assets/pig_hurt'+(Math.floor(Math.random()*2)+1)+'.wav').play()}catch(e){}
+      },delay*1000+200);
       sfxPlayed=true;
     }
   });
@@ -582,8 +563,6 @@ function explodePigs(){
   pigCards.forEach(function(pc){
     pc.card.style.visibility='hidden';
   });
-  
-  setTimeout(function(){ov.remove();},3000);
 }
 
 
