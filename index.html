@@ -264,7 +264,8 @@ function nextRound(){
   
   selectedChoice=null;
   renderRound();
-  speak('Completa a sequência!','pt-PT');
+  var hint='Completa a sequência! Escolhe o personagem que falta em cada espaço.';
+  speak(hint,'pt-PT');
   startIdleAnimations();
 }
 
@@ -304,7 +305,8 @@ function renderRound(){
   
   // Render choices - show characters NOT in the blanks (so they have to deduce)
   var usedFiles={};
-  sequence.forEach(function(c){usedFiles[c.file]=true});
+  // Track which files are used in the sequence (skip blanks)
+  sequence.forEach(function(c){if(c)usedFiles[c.file]=true});
   
   // Pick 4 choices including correct ones and some distractor
   var correctFiles={};
