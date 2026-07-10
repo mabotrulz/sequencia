@@ -539,17 +539,54 @@ function explodePigs(){
   
   var sfxPlayed=false;
   
-  // Each pig grows at center then slides down or flies off
+  // Each pig: 50% hit screen at random position, 50% spin out
   pigCards.forEach(function(pc,i){
-    var delay=i*0.15;
+    var delay=i*0.12;
     var img=document.createElement('img');
     img.src=pc.src;
-    img.style.cssText='position:fixed;left:50%;top:50%;z-index:200;pointer-events:none;width:80px;height:80px;object-fit:contain';
-    img.style.animation='pigGrow 2s cubic-bezier(0.2,0.8,0.3,1) forwards';
-    img.style.animationDelay=delay+'s';
+    img.style.cssText='position:fixed;z-index:200;pointer-events:none;width:clamp(50px,12vw,90px);height:clamp(50px,12vw,90px);object-fit:contain';
     img.style.opacity='0';
     document.body.appendChild(img);
-    setTimeout(function(){img.remove()},3000);
+    
+    var hitScreen=Math.random()<0.5;
+    if(hitScreen){
+      // Appear at random position, grow big, then slide down
+      var tx=15+Math.random()*70;
+      var ty=10+Math.random()*50;
+      img.style.left=tx+'%';
+      img.style.top=ty+'%';
+      img.style.transition='none';
+      // Start small, invisible
+      img.style.transform='scale(0.2) rotate('+(Math.random()-0.5)+'turn)';
+      // After delay: grow big
+      setTimeout(function(){
+        img.style.transition='all 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+        img.style.transform='scale('+(3+Math.random()*2)+') rotate('+(Math.random()-0.5)*0.1+'turn)';
+        img.style.opacity='1';
+      },delay*1000);
+      // Then slide down
+      setTimeout(function(){
+        img.style.transition='all 1.2s cubic-bezier(0.3,0.1,0.8,0.4)';
+        img.style.top='110%';
+        img.style.transform='scale('+(2+Math.random())+') rotate('+(Math.random()-0.5)+'turn)';
+      },delay*1000+800);
+    }else{
+      // Spin and fly out in random direction
+      var angle=Math.random()*Math.PI*2;
+      var dist=300+Math.random()*400;
+      var dx=Math.cos(angle)*dist;
+      var dy=Math.sin(angle)*dist;
+      img.style.left='50%';
+      img.style.top='50%';
+      img.style.transform='translate(-50%,-50%) scale(0.3)';
+      setTimeout(function(){
+        img.style.transition='all 1.2s cubic-bezier(.2,.8,.3,1)';
+        img.style.transform='translate(calc(-50%+'+dx+'px),calc(-50%+'+dy+'px)) scale(1.8) rotate('+(2+Math.random()*4)+'turn)';
+        img.style.opacity='0.8';
+      },delay*1000);
+    }
+    
+    setTimeout(function(){img.remove()},3500);
     
     if(!sfxPlayed){
       setTimeout(function(){
