@@ -211,13 +211,13 @@ function scheduleAnim(card,idx){
       void img.offsetWidth;
       if(r<0.33){
         img.style.animation='pigJump 0.4s ease';
-        playAudio('assets/pig_fart.wav?v=2',0.3);
+        playAudio('assets/pig_fart.wav',0.3);
       }else if(r<0.66){
         img.style.animation='pigShake 0.4s ease';
-        playAudio('assets/pig_laugh.wav?v=2',0.3);
+        playAudio('assets/pig_laugh.wav',0.3);
       }else{
         img.style.animation='pigJump 0.3s ease';
-        playAudio('assets/pig_snort.wav?v=2',0.3);
+        playAudio('assets/pig_snort.wav',0.3);
       }
       setTimeout(function(){img.style.animation=''},400);
     }
