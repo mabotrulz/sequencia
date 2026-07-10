@@ -573,7 +573,7 @@ function explodePigs(){
     }
     
     if(!sfxPlayed){
-      sfxExplosion();
+      try { new Audio('assets/pig_hurt' + (Math.floor(Math.random()*2)+1) + '.wav').play(); } catch(e) {}
       sfxPlayed=true;
     }
   });
