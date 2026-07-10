@@ -254,15 +254,11 @@ function nextRound(){
     sequence.push(pattern[idx]);
   }
   
-  // Pick blank positions — each must have been shown at least once before
+  // Pick blank positions — at least one full cycle must be visible first
   var allPos=[];
-  for(var i=0;i<seqLen;i++){
-    // Check if this character has appeared somewhere before position i
-    var seen=false;
-    for(var j=0;j<i;j++){
-      if(sequence[j].file===sequence[i].file){seen=true;break;}
-    }
-    if(seen)allPos.push(i);
+  var minShow=patternLen+1; // Full cycle + one extra to show the repetition
+  for(var i=minShow;i<seqLen;i++){
+    allPos.push(i);
   }
   blanks=shuffle(allPos).slice(0,Math.min(blankCount,allPos.length));
   blanks.sort(function(a,b){return a-b});
