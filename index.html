@@ -66,7 +66,10 @@ animation:pulse 1.5s ease infinite}
 .conf{position:absolute;border-radius:2px;animation:confFall linear forwards}
 @keyframes confFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 @keyframes explRing{0%{transform:translate(-50%,-50%) scale(0);opacity:0;border-width:clamp(4px,1vw,8px)}40%{transform:translate(-50%,-50%) scale(1);opacity:1;border-width:clamp(2px,0.5vw,4px)}100%{transform:translate(-50%,-50%) scale(3);opacity:0;border-width:1px}}
-@keyframes pigGrow{0%{transform:translate(-50%,-50%) scale(0.3) rotate(-10deg);opacity:0}20%{opacity:1}60%{transform:translate(-50%,-50%) scale(5) rotate(-3deg);opacity:1}80%{transform:translate(-50%,-50%) scale(5.5) rotate(3deg);opacity:1}100%{transform:translate(-50%,calc(50vh + 60vw)) scale(5) rotate(15deg);opacity:1}}
+/* Pig explosion animations */
+@keyframes pigHitScreen{0%{transform:translate(-50%,-50%) scale(0.2);opacity:0}15%{opacity:1}50%{transform:translate(-50%,-50%) scale(4);opacity:1}100%{transform:translate(-50%,0) translateY(100vh) scale(3);opacity:1}}
+@keyframes pigSpinOut{0%{transform:translate(-50%,-50%) scale(0.2);opacity:0}20%{opacity:1}100%{transform:translate(-50%,-50%) scale(1.5) rotate(4turn);opacity:0}}
+@keyframes pigFlyAway{0%{transform:translate(-50%,-50%) scale(0.2);opacity:0}20%{opacity:1}100%{transform:translate(-50%,-50%) scale(1.8);opacity:0.5}}
 @keyframes explBoom{0%{transform:translate(-50%,-50%) scale(0);opacity:0}20%{transform:translate(-50%,-50%) scale(0.5);opacity:1}50%{transform:translate(-50%,-50%) scale(2);opacity:1}100%{transform:translate(-50%,-50%) scale(3);opacity:0}}
 @keyframes flashAnim{0%{opacity:0.8}100%{opacity:0}}
 </style>
@@ -539,14 +542,13 @@ function explodePigs(){
   
   var sfxPlayed=false;
   
-  // Each pig: fly from card position — 50% hit screen, 50% spin out
   pigCards.forEach(function(pc,i){
-    var delay=i*0.18;
+    var delay=i*0.2;
     var img=document.createElement('img');
     img.src=pc.src;
     var rect=pc.card.getBoundingClientRect();
     
-    // Start at the card's exact screen position
+    // Fixed at card position — only transform will change
     img.style.cssText='position:fixed;z-index:200;pointer-events:none;width:clamp(45px,11vw,80px);height:clamp(45px,11vw,80px);object-fit:contain';
     img.style.left=rect.left+'px';
     img.style.top=rect.top+'px';
@@ -554,38 +556,40 @@ function explodePigs(){
     img.style.opacity='0';
     document.body.appendChild(img);
     
-    // Wait for browser to paint initial state, then animate
+    // Stagger then animate — transition specified properties only
     setTimeout(function(){
-      var hitScreen=Math.random()<0.5;
-      img.style.transition='all 0.7s cubic-bezier(0.34,1.56,0.64,1)';
-      if(hitScreen){
+      img.style.opacity='1';
+      img.style.transition='transform 0.7s cubic-bezier(0.34,1.56,0.64,1), left 0.7s, top 0.7s';
+      
+      if(Math.random()<0.5){
+        // Hit screen: fly to random position, grow big, then slide down
         var tx=15+Math.random()*70;
         var ty=15+Math.random()*50;
         img.style.left=tx+'%';
         img.style.top=ty+'%';
-        img.style.transform='translate(-50%,-50%) scale('+(3+Math.random()*2)+')';
-        img.style.opacity='1';
+        img.style.transform='translate(-50%,-50%) scale(5)';
         setTimeout(function(){
-          img.style.transition='all 1s cubic-bezier(0.3,0.1,0.8,0.4)';
+          img.style.transition='transform 1s cubic-bezier(0.3,0.1,0.8,0.4), top 1s';
           img.style.top='110%';
-          img.style.transform='translate(-50%,0) scale('+(2+Math.random())+')';
+          img.style.transform='translate(-50%,0) scale(4)';
         },800);
       }else{
+        // Fly away: spin and fly off in random direction
         var angle=Math.random()*Math.PI*2;
         var dist=250+Math.random()*350;
         var dx=Math.cos(angle)*dist;
         var dy=Math.sin(angle)*dist;
-        img.style.transform='translate(calc(-50%+'+dx+'px),calc(-50%+'+dy+'px)) scale(1.6) rotate('+(2+Math.random()*4)+'turn)';
-        img.style.opacity='0.7';
+        img.style.transform='translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale(1.5) rotate('+(2+Math.random()*3)+'turn)';
+        img.style.opacity='0.6';
       }
     },delay*1000);
     
-    setTimeout(function(){img.remove()},4000);
+    setTimeout(function(){if(img&&img.parentNode)img.parentNode.removeChild(img)},4000);
     
     if(!sfxPlayed){
       setTimeout(function(){
         try{new Audio('assets/pig_hurt'+(Math.floor(Math.random()*2)+1)+'.wav').play()}catch(e){}
-      },delay*1000+300);
+      },delay*1000+400);
       sfxPlayed=true;
     }
   });
